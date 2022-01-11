@@ -15,7 +15,7 @@ def connect_db(app):
 
 class User(db.Model):
     
-    __tablename__ = "cupcakes"
+    __tablename__ = "users"
     id = db.Column(db.Integer,
                    primary_key=True,
                    autoincrement=True)
@@ -30,13 +30,19 @@ class User(db.Model):
     last_name = db.Column(db.String(30),
                      nullable=False)
     
+    feedback = db.relationship("Feedback", backref="user", cascade="all,delete")
+
+    
     @classmethod
-    def register(cls, username, pwd, first_name=None, last_name=None):
+    def register(cls, username, pwd, email, first_name, last_name):
         hashed= bcrypt.generate_password_hash(pwd)
         
         hashed_utf8 = hashed.decode("utf8")
         
-        return cls(username=username, password=hashed_utf8)
+        new_user = cls(username=username, password=hashed_utf8, email=email, first_name=first_name, last_name=last_name)
+        db.session.add(new_user)
+        return new_user
+    
     
     @classmethod
     def authenticate(cls, username, pwd):
@@ -46,3 +52,13 @@ class User(db.Model):
             return u
         else:
             return False
+        
+class Feedback(db.Model):
+    
+    __tablename__ = "feedback"
+    id = db.Column(db.Integer,
+                   primary_key=True,
+                   autoincrement=True)
+    title = db.Column(db.String(100), nullable=False)
+    content = db.Column(db.Text, nullable=False)
+    username = db.Column(db.String(20), db.ForeignKey('users.username'), nullable=False )
