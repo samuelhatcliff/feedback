@@ -18,11 +18,11 @@ class LoginForm(FlaskForm):
     password = PasswordField("Password", validators=[InputRequired()])
     
 class AddFeedback(FlaskForm):
-    title = StringField("Username", validators=[InputRequired()])
-    content = StringField("Username", validators=[InputRequired()])
+    title = StringField("Title", validators=[InputRequired()])
+    content = StringField("Content", validators=[InputRequired()])
     
 class UpdateFeedback(FlaskForm):
-    title = StringField("Username", validators=[InputRequired()])
-    content = StringField("Username", validators=[InputRequired()])
+    title = StringField("Title", validators=[InputRequired()])
+    content = StringField("Content", validators=[InputRequired()])
 
     

@@ -26,12 +26,12 @@ db.create_all()
 def home_page():
     return redirect('/register')
 
-@app.route('/users/<username>')
-def show_secrets(username):
-    if "user_id" not in session:
+@app.route('/users/<username_id>')
+def show_user(username_id):
+    if "user_id" not in session or int(username_id) != session['user_id']:
         return redirect('/')
-    user = User.query.get(username)
-    return render_template('secrets.html', user = user)
+    user = User.query.get(username_id)
+    return render_template('user_profile.html', user = user)
 
 @app.route('/register', methods=['GET', 'POST'])
 def register_user():
@@ -45,9 +45,8 @@ def register_user():
         new_user = User.register(username, password, email, first_name, last_name)
         db.session.add(new_user)
         db.session.commit()
-        session['user_id'] = new_user.username
-    
-        return render_template('secrets.html', user = new_user)
+        session['user_id'] = new_user.id
+        return redirect(f'/users/{new_user.id}')
     
     return render_template('register.html', form=form)
 
@@ -68,26 +67,36 @@ def login_user():
     
     return render_template('login.html')
 
+@app.route('/users/<username_id>/delete', methods = ["POST"])
+def delete_user(username_id):
+    if "user_id" not in session or int(username_id) != session['user_id']:
+        return redirect('/')
+    user = User.query.get(username_id)
+    db.session.delete(user)
+    session.pop('user_id')
+    db.session.commit()
+    return redirect('/')
+
 @app.route('/logout')
 def logout_user():
     session.pop('user_id')
     return redirect('/')
 
-@app.route('/users/<username>/feedback/add', methods=['GET', 'POST'])
-def add_feedback(username):
-    if "user_id" not in session:
+@app.route('/users/<username_id>/feedback/add', methods=['GET', 'POST'])
+def add_feedback(username_id):
+    if "user_id" not in session or int(username_id) != session['user_id']:
         return redirect('/')
     form = AddFeedback()
-    user = User.query.get(username)
+    user = User.query.get(username_id)
     if form.validate_on_submit():
         feedback = Feedback(
             title=form.title.data,
             content=form.content.data,
-            username=username
+            username = user.id
         )
         db.session.add(feedback)
         db.session.commit()
-        return redirect(f'/users/{username}')
+        return redirect(f'/users/{username_id}')
         
     
    
@@ -95,10 +104,11 @@ def add_feedback(username):
 
 @app.route('/feedback/<int:feedback_id>/update', methods=['GET', 'POST'])
 def update_feedback(feedback_id):
-    if "user_id" not in session:
-        return redirect('/')
     form = UpdateFeedback()
     feedback = Feedback.query.get(feedback_id)
+    user = User.query.get(feedback.username)
+    if "user_id" not in session or int(user.id) != session['user_id']:
+        return redirect('/')
     if form.validate_on_submit():
         feedback.content= form.content.data
         feedback.title= form.title.data
@@ -111,12 +121,14 @@ def update_feedback(feedback_id):
 
 @app.route('/feedback/<int:feedback_id>/delete', methods=['POST'])
 def delete_feedback(feedback_id):
-    if "user_id" not in session:
-        return redirect('/')
+    print("HIT ROUTEEEE")
     feedback = Feedback.query.get(feedback_id)
+    user = User.query.get(feedback.username)
+    if "user_id" not in session or int(user.id) != session['user_id']:
+        return redirect('/')
     db.session.delete(feedback)
     db.session.commit()
-    return redirect(f'/users/{feedback.username}')
+    return redirect(f'/users/{user.id}')
 
 
     

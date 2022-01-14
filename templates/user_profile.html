@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Secrets</title>
+    <title>User Profile</title>
 </head>
 <h1>User Info</h1>
 <div>
@@ -37,20 +37,29 @@
     {% for feedback in user.feedback %}
 
     <li>
-        <b>{{ feedback.title }}</b>
+        <b>{{ feedback.title }}:</b>
+        <div>
         {{ feedback.content }}
+        </div>
     </li>
     <p>
-        <a href="/users/{{ user.username }}/feedback/add">
-            Add feedback
-        </a>
-        <a href="/feedback/{{feedback.id}}/update">
-            Update feedback
-        </a>
+        
+        <form action='/feedback/{{feedback.id}}/update' , method="GET">
+            <input type="submit" value="Update Feedback">
+            </form>
+        <form action='/feedback/{{feedback.id}}/delete' , method="POST">
+        <input type="submit" value="Delete Feedback">
+        </form>
+        
     </p>
     {% endfor %}
 </ul>
-
+<form action='/users/{{user.id}}/feedback/add' , method="GET">
+    <input type="submit" value="Add Feedback" />
+</form>
+<form action='/users/{{user.id}}/delete', method="POST">
+    <input type="submit" value="Delete User" />
+</form>
 <body>
 
 </body>
