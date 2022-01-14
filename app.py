@@ -52,20 +52,26 @@ def register_user():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login_user():
+    print(LoginForm())
+    print("^^^ OBER HEREEEE")
+    if "user_id" in session:
+        return redirect(f"/users/{session['user_id']}")
+
     form = LoginForm()
+    
     if form.validate_on_submit():
         username = form.username.data
         password = form.password.data
         
         user = User.authenticate(username, password)
         if user:
-            session['user_id'] = user.username
+            session['user_id'] = user.id
 
-            return redirect(f'/users/{user.username}')
+            return redirect(f'/users/{user.id}')
         else:
             form.username.errors=["Invalid username or password. Please try again."]
     
-    return render_template('login.html')
+    return render_template('login.html', form=form)
 
 @app.route('/users/<username_id>/delete', methods = ["POST"])
 def delete_user(username_id):
@@ -121,7 +127,6 @@ def update_feedback(feedback_id):
 
 @app.route('/feedback/<int:feedback_id>/delete', methods=['POST'])
 def delete_feedback(feedback_id):
-    print("HIT ROUTEEEE")
     feedback = Feedback.query.get(feedback_id)
     user = User.query.get(feedback.username)
     if "user_id" not in session or int(user.id) != session['user_id']:
