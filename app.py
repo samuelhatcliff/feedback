@@ -10,7 +10,7 @@ bcrypt = Bcrypt()
 
 app = Flask(__name__)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql:///feedback'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql:///feedback-main'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ECHO'] = True
 app.config['SECRET_KEY'] = "topsecret1"
@@ -19,6 +19,7 @@ debug = DebugToolbarExtension(app)
 
 
 connect_db(app)
+db.create_all()
 
 
 @app.route('/')
@@ -30,7 +31,7 @@ def show_secrets(username):
     if "user_id" not in session:
         return redirect('/')
     user = User.query.get(username)
-    return render_template('secrets.html', user)
+    return render_template('secrets.html', user = user)
 
 @app.route('/register', methods=['GET', 'POST'])
 def register_user():
@@ -42,11 +43,11 @@ def register_user():
         first_name = form.first_name.data
         last_name = form.last_name.data
         new_user = User.register(username, password, email, first_name, last_name)
-        # db.session.add(new_user)
-        # db.session.commit()
+        db.session.add(new_user)
+        db.session.commit()
         session['user_id'] = new_user.username
     
-        return redirect('/users/<username>')
+        return render_template('secrets.html', user = new_user)
     
     return render_template('register.html', form=form)
 
